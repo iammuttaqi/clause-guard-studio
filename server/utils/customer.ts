@@ -1,9 +1,10 @@
 import type { H3Event } from 'h3';
 import { getHeader, getCookie, setCookie } from 'h3';
-import { getPrismaClient } from './prisma';
+import { getPrismaClient, ensureDatabaseReady } from './prisma';
 
 export async function getCustomerSession(event: H3Event) {
   const prisma = getPrismaClient();
+  await ensureDatabaseReady(prisma);
 
   const emailHeader = getHeader(event, 'x-customer-email');
   const emailCookie = getCookie(event, 'clauseguard_customer_email');

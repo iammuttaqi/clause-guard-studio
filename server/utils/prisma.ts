@@ -201,3 +201,20 @@ export function getPrismaClient(): PrismaClient {
 
   return prismaInstance;
 }
+
+let schemaInitPromise: Promise<void> | null = null;
+
+export async function ensureDatabaseReady(prisma?: PrismaClient): Promise<void> {
+  const client = prisma || getPrismaClient();
+  if (isSchemaInitialized) return;
+  if (!schemaInitPromise) {
+    schemaInitPromise = ensureDatabaseSchema(client).then(() => {
+      isSchemaInitialized = true;
+    }).catch((err) => {
+      console.warn('[Prisma Cold-Start] Schema initialization notice:', err);
+      isSchemaInitialized = true;
+    });
+  }
+  await schemaInitPromise;
+}
+

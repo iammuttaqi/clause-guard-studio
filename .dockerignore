@@ -1,0 +1,9 @@
+node_modules
+.nuxt
+.output
+.vercel
+dist
+.git
+.env
+.env*.local
+*.log
