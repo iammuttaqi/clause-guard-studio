@@ -1,0 +1,98 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -----------------------------------------------------------------------------
+// Customer Model
+// Represents the authenticated user, session, or enterprise tenant.
+// Tracks active tier (FREE, PRO, LIFETIME), quota usage, and Stripe billing keys.
+// -----------------------------------------------------------------------------
+model Customer {
+  id               String          @id @default(cuid())
+  email            String          @unique
+  stripeCustomerId String?         @unique
+  subscriptionId   String?         @unique
+  tier             String          @default("FREE") // "FREE" | "PRO" | "LIFETIME"
+  usageCount       Int             @default(0)      // Current 30-day billing cycle scans
+  quotaLimit       Int             @default(3)      // 3 for FREE; 999999 for PRO/LIFETIME
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  // Relationships
+  audits           ContractAudit[]
+
+  @@index([email])
+  @@index([stripeCustomerId])
+}
+
+// -----------------------------------------------------------------------------
+// ContractAudit Model
+// Records a contract review session, raw text payload, and calculated health metrics.
+// -----------------------------------------------------------------------------
+model ContractAudit {
+  id              String            @id @default(cuid())
+  customerId      String
+  title           String            @default("Untitled Commercial Agreement")
+  contractType    String            // "msa" | "sow" | "retainer" | "nda" | "custom"
+  rawText         String            // Sanitized source agreement text
+  overallScore    Int               // 0 - 100 Protection Index
+  riskLevel       String            // "CRITICAL" | "WARNING" | "SAFE"
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relationships
+  customer        Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  clauseFlags     ClauseFlag[]
+  overrunScenario OverrunScenario?
+
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+// -----------------------------------------------------------------------------
+// ClauseFlag Model
+// Detailed record of each predatory or non-standard clause detected during analysis.
+// Stores original text, explanatory risk analysis, and 3 calibrated counter-clauses.
+// -----------------------------------------------------------------------------
+model ClauseFlag {
+  id                        String        @id @default(cuid())
+  auditId                   String
+  originalText              String        // Offending text snippet extracted from contract
+  clauseType                String        // "liability" | "scope" | "payment" | "ip" | "restrictive"
+  severity                  String        // "CRITICAL" | "WARNING" | "SAFE"
+  explanation               String        // Plain-English legal risk advisory
+  counterClauseCollaborative String        // Gentle / relational replacement phrasing
+  counterClauseFirm         String        // Industry-standard protective replacement phrasing
+  counterClauseAssertive    String        // Hard-line enterprise-protective replacement phrasing
+  createdAt                 DateTime      @default(now())
+
+  // Relationships
+  audit                     ContractAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@index([auditId])
+  @@index([clauseType])
+  @@index([severity])
+}
+
+// -----------------------------------------------------------------------------
+// OverrunScenario Model
+// Financial model capturing potential scope creep downside and protective SLA rates.
+// -----------------------------------------------------------------------------
+model OverrunScenario {
+  id                 String        @id @default(cuid())
+  auditId            String        @unique
+  baseFee            Float         // Fixed quoted project fee ($)
+  includedRevisions  Int           // Maximum revision cycles included in base fee
+  hourlyOverrunRate  Float         // Mandated overrun rate for extra revisions ($/hr)
+  calculatedDownside Float         // Financial revenue exposure from unbilled hours ($)
+  bufferFee          Float         // Recommended scope-containment contingency fee ($)
+  createdAt          DateTime      @default(now())
+
+  // Relationships
+  audit              ContractAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+}

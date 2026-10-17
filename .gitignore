@@ -1,0 +1,29 @@
+# Nuxt & Node outputs
+node_modules/
+.nuxt/
+.output/
+dist/
+.vercel/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env*.local
+
+# SQLite development databases (except starter templates)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Explicitly whitelist starter databases for cold starts
+!prisma/starter.db
+!public/starter.db
+
+# macOS files
+.DS_Store
