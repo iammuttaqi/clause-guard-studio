@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && prisma generate",
+    "test": "tsx tests/verify-all.ts",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:generate": "prisma generate"
@@ -28,6 +29,7 @@
     "@nuxtjs/tailwindcss": "^6.13.1",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.13.4",
+    "h3": "^2.0.2",
     "nuxt": "^3.15.4",
     "prisma": "^6.3.1",
     "tailwindcss": "^3.4.17",
