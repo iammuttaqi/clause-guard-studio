@@ -1,5 +1,6 @@
-import { defineEventHandler } from 'h3';
+import { defineEventHandler, setResponseStatus } from 'h3';
 
-export default defineEventHandler(() => {
-  return null;
+export default defineEventHandler((event) => {
+  setResponseStatus(event, 200);
+  return 'OK';
 });
