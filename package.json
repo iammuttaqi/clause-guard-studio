@@ -11,7 +11,9 @@
     "test": "tsx tests/verify-all.ts",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
